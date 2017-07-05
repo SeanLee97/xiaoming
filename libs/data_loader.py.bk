@@ -1,0 +1,136 @@
+# !/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+'''
+加载语料
+返回 Variable
+'''
+import jieba
+import os, math, random, re, time, sys
+import torch
+from torch.autograd import Variable
+from io import open
+if __name__ == '__main__':
+	sys.path.append('../config')
+	from config import *
+	from func import rm_sign
+else:
+	from libs.func import rm_sign
+	from config.config  import *
+
+# Q&A库所在路径
+q_file = CORPUS_DIR+'/q.txt';
+a_file = CORPUS_DIR+'/a.txt';
+
+class dataLoader(object):
+	def __init__(self):
+		# 加载词库
+		if os.path.exists(dict_path):
+			print('加载词典中...')
+			jieba.load_userdict(dict_path)
+
+		self.load_corpus()
+
+	# 分词
+	# @param rm_sign 是否清除标点
+	@staticmethod
+	def wordseg(sentence, rmsign=True):
+		sentence = sentence.strip()
+		if rmsign:
+			sentence = rm_sign(sentence)
+		word_list = jieba.lcut(sentence.strip())
+		return word_list
+
+	# 内部类
+	class Lang(object):
+		def __init__(self):
+			self.word2index = {}
+			self.word2count = {}
+			self.index2word = {0: 'SOS', 1: 'EOS'}
+			self.n_words = 2   #初始值有SOS EOS 故为2
+		
+		def add_sentence(self, sentence):
+			word_list = dataLoader.wordseg(sentence)
+			for word in word_list:
+				self.add_word(word)
+
+		def add_word(self, word):
+			if word not in self.word2index:
+				self.word2index[word] = self.n_words
+				self.word2count[word] = 1
+				self.index2word[self.n_words] = word
+				self.n_words += 1
+			else:
+				self.word2count[word] += 1	
+
+	def filter_line(self, line):
+		word_list = dataLoader.wordseg(line)
+		return len(word_list) < MAX_LENGTH
+	
+	def load_corpus(self):
+		print("正在加载语料库...")
+		
+		# 判断文件是否存在		
+		if not os.path.exists(q_file):
+			print("请将question库文件名命名为q.txt，quesion库目录应为%s" %  q_file)
+			sys.exit()
+		if not os.path.exists(a_file):
+			print("请将answer库文件名命名为q.txt，anwser库目录应为%s" % a_file)
+			sys.exit()
+		
+		# 加载语料并处理
+		self.en_lang = self.Lang() # encoder_lang
+		self.de_lang = self.Lang() # decoder_lang
+		
+		q_list = []
+		a_list = []
+		with open(q_file, 'r') as f:
+			for line in f.readlines():
+				q_list.append(line.strip('\n'))
+		with open(a_file, 'r') as f:
+			for line in f.readlines():
+				a_list.append(line.strip('\n'))
+				
+		self.pairs = []
+		for i in range(len(q_list)):
+			self.pairs.append({0: q_list[i], 1: a_list[i]})
+
+		for en in q_list:
+			self.en_lang.add_sentence(en)
+		for de in a_list:
+			self.de_lang.add_sentence(de)
+		
+		print("语料库统计：")
+		print("Q: %d 词" % self.en_lang.n_words)
+		print("A: %d 词" % self.de_lang.n_words)
+
+	@staticmethod
+	def indexes_from_sentence(lang, sentence):
+		word_list = dataLoader.wordseg(sentence)
+		index_list = [];
+		for word in word_list:
+			if word in lang.word2index:  
+				index_list.append(lang.word2index[word])
+		if len(index_list) == 0:
+				index_list = [0]
+		return index_list
+		#return [lang.word2index[word] for word in word_list]
+		
+		
+	def variable_from_sentence(self, lang, sentence):
+		indexes = self.indexes_from_sentence(lang, sentence)
+		indexes.append(EOS_TOKEN)
+		result = Variable(torch.LongTensor(indexes).view(-1, 1))
+		if USE_CUDA:
+			return result.cuda()
+		else:
+			return result
+
+	def get_pair_variable(self):
+		pair = random.choice(self.pairs)
+		en_variable = self.variable_from_sentence(self.en_lang, pair[0])
+		de_variable = self.variable_from_sentence(self.de_lang, pair[1])
+		return en_variable, de_variable
+
+if __name__  == '__main__':
+	pass

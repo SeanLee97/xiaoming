@@ -1,0 +1,10 @@
+__username__
+__actWeather__
+__actLocation__
+__location__
+__actChangeUsername__
+__actAddPlan__
+__robotname__
+__actStory__
+__actCalculate__
+__actTranslate__
