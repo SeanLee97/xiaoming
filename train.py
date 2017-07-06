@@ -37,7 +37,7 @@ def train_model(input_variable, target_variable, encoder, decoder, encoder_optim
         decoder_input = decoder_input.cuda()
         decoder_context = decoder_context.cuda()
 
-    use_teacher_forcing = True if random.random() < LEARNING_RATE else False
+    use_teacher_forcing = True if random.random() < LEARNING_FORCE_RATE else False
 
     if use_teacher_forcing:
         try:
@@ -76,7 +76,7 @@ def train_model(input_variable, target_variable, encoder, decoder, encoder_optim
 
 
 def train(data_loader, encoder, decoder, print_every=100, save_every=1000, evaluate_every=100,
-          learning_rate=0.01):
+          learning_rate=LEARNING_RATE):
     start = time.time()
     print_loss_total = 0 
 

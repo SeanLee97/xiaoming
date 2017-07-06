@@ -26,7 +26,8 @@ EOS_TOKEN 			= 1
 net parameters
 '''
 USE_CUDA 			= torch.cuda.is_available()
-LEARNING_RATE 		= 0.5
+LEARNING_RATE 		= 0.01
+LEARNING_FORCE_RATE = 0.5
 CLIP				= 5.0
 N_EPOCHS			= 10000
 N_LAYERS			= 2
