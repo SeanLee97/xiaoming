@@ -49,18 +49,14 @@ def train_model(input_variable, target_variable, encoder, decoder, encoder_optim
             return
 
     else:
-        # 
         try:
             for di in range(target_length):
                 decoder_output, decoder_context, decoder_hidden, decoder_attention = decoder(decoder_input, decoder_context, decoder_hidden, encoder_outputs)
                 loss += criterion(decoder_output[0], target_variable[di])
                 topv, topi = decoder_output.data.topk(1)
                 ni = topi[0][0]
-
                 decoder_input = Variable(torch.LongTensor([[ni]]))
                 decoder_input = decoder_input.cuda() if USE_CUDA else decoder_input
-
-                loss += criterion(decoder_output[0], target_variable[di])
                 if ni == EOS_TOKEN:
                     break
         except KeyboardInterrupt:

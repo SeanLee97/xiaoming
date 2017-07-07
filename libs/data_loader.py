@@ -41,8 +41,8 @@ class dataLoader(object):
 			self.word2index = word2index
 
 		def set_index2word(self, index2word):
-			self.index2word = dict(self.index2word)
-			self.index2word.update(index2word)
+			self.index2word = index2word
+
 
 	def filter_line(self, line):
 		word_list = wordseg(line)
@@ -81,42 +81,31 @@ class dataLoader(object):
 		for i in range(len(q_lines)):
 			self.pairs.append({0: q_lines[i], 1: a_lines[i]})
 
-		en_nwords = 0
-		de_nwords = 0
-		en_index2word = {}
-		en_word2index = {}
-		de_index2word = {}
-		de_word2index = {}
 		self.word_dict = {}
 
 		for k,v in vocab.items():
 			self.word_dict[k] = int(v)+2 #将词后移动，使头两位为SOS，EOS
+
 		word_index = 0
 		for en_line in q_lines:
 			word_list = wordseg(en_line)
 			for word in word_list:
-				if word in self.word_dict:
+				if word in self.word_dict and word not in self.en_lang.word2index:
 					word_index = self.word_dict[word]
-					en_word2index[word] = word_index
-					en_index2word[word_index] = word
-					en_nwords+=1
+					self.en_lang.word2index[word] = word_index
+					self.en_lang.index2word[word_index] = word
+					self.en_lang.n_words+=1
 
-		self.en_lang.set_word2index(en_word2index)
-		self.en_lang.set_index2word(en_index2word)
-		self.en_lang.set_nwords(en_nwords)
 
 		for de_line in a_lines:
 			word_list = wordseg(de_line)
 			for word in word_list:
-				if word in self.word_dict:
+				if word in self.word_dict and word not in self.de_lang.word2index:
 					word_index = self.word_dict[word]
-					de_word2index[word] = word_index
-					de_index2word[word_index] = word
-					de_nwords+=1
+					self.en_lang.word2index[word] = word_index
+					self.en_lang.index2word[word_index] = word
+					self.en_lang.n_words+=1
 
-		self.de_lang.set_word2index(de_word2index)
-		self.de_lang.set_index2word(de_index2word)
-		self.de_lang.set_nwords(de_nwords)
 
 		print("语料库统计：")
 		print("Q: %d 词" % self.en_lang.n_words)
