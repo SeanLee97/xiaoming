@@ -50,13 +50,6 @@ python3 test.py
 ## 问题反馈
 欢迎和我交流！共同学习！
 
-* 邮件(lxm_0828#163.com, 把#换成@)
+* 邮件(xmlee97#gmail.com, 把#换成@)
 * QQ: 929325776
 * weibo: [@捏明](http://weibo.com/littlelxm)
-
-
-##关于作者
-
-```
-学生一枚，就读于山大（shanxi university）, 对deep learning(深度学习), NLP(自然语言处理)，NLU(自然语言理解)，Big Data(大数据)有狂热的学习欲望，精通WEB。
-```
